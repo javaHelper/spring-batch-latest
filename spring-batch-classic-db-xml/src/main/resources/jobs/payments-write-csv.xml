@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- spring batch core settings -->
+	<import resource="../config/context.xml" />
+
+	<!-- database settings -->
+	<import resource="../config/database.xml" />
+
+	<bean id="rangePartitioner" class="com.prateek.partion.RangePartitioner" />
+ 	<bean id="taskExecutor" class="org.springframework.core.task.SimpleAsyncTaskExecutor" />
+ 	<bean id="cppReporttaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="10" />
+		<property name="maxPoolSize" value="10" />
+		<property name="allowCoreThreadTimeOut" value="true" />
+	</bean>
+ 	
+ 	<bean id="paymentsProcessor" class="com.prateek.processor.PaymentsProcessor" scope="step">
+ 		<property name="threadName" value="#{stepExecutionContext[name]}" />
+ 	</bean>
+ 	
+ 	
+ 	<!-- Job -->
+ 	<batch:job id="paymentsPartitionJob" xmlns="http://www.springframework.org/schema/batch">
+ 		<batch:step id="masterStep">
+ 			<batch:partition step="slave" partitioner="rangePartitioner">
+ 				<batch:handler grid-size="10"  task-executor="taskExecutor" />
+ 			</batch:partition>
+ 		</batch:step>
+ 	</batch:job>
+ 	
+ 	
+ 	<batch:step id="slave" xmlns="http://www.springframework.org/schema/batch">
+ 		<batch:tasklet>
+ 			<batch:chunk reader="pagingItemReader" processor="paymentsProcessor" writer="paymentItemWriter" commit-interval="10" />
+ 		</batch:tasklet>
+ 	</batch:step>
+ 	
+ 	
+	<!-- ========= Payment Item Reader -->
+	<bean id="pagingItemReader" class="org.springframework.batch.item.database.JdbcPagingItemReader" scope="step">
+		<property name="dataSource" ref="dataSource" />
+		<property name="pageSize" value="200" />
+		
+		<property name="queryProvider">
+			<bean class="org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean">
+				<property name="dataSource" ref="dataSource" />
+				<property name="selectClause" value="SELECT customerNumber, checkNumber,paymentDate,amount" />
+				<property name="fromClause" value="FROM classicmodels.payments" />
+				<!-- <property name="whereClause" value="${payments.query.where.clause}" /> --> <!-- This also works -->
+				<property name="whereClause">
+					<value>
+						<![CDATA[ WHERE customerNumber >= :fromId AND customerNumber <= :toId ]]>
+					</value>
+				</property>
+				
+				<property name="sortKey" value="customerNumber" />
+			</bean>
+		</property>
+		<!-- Inject via the ExecutionContext in rangePartitioner -->
+		<property name="parameterValues">
+			<map>
+				<entry key="fromId" value="#{stepExecutionContext[fromId]}" />
+				<entry key="toId" value="#{stepExecutionContext[toId]}" />
+			</map>
+		</property>
+		<property name="rowMapper">
+			<bean class="com.prateek.mapper.PaymentsRowMapper" />
+		</property>
+	</bean>
+	
+	<bean id="payFlatFileWriterCallback" class="com.prateek.callback.PaymentsFlatFileWriterCallback" />
+	
+	
+	<!-- Payments Item Writer -->
+	<bean id="paymentItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
+		<property name="resource" value="file:csv/outputs/users.processed#{stepExecutionContext[fromId]}-#{stepExecutionContext[toId]}.csv" />
+		
+		<property name="appendAllowed" value="true" />
+		
+		<property name="headerCallback" ref="payFlatFileWriterCallback" />
+		
+		<property name="lineAggregator">
+			<bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+				<property name="delimiter" value="," />
+				
+				<property name="fieldExtractor">
+				 	<bean class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+						<property name="names" value="customerNumber, checkNumber, paymentDate, amount" />
+				  	</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	
+</beans>

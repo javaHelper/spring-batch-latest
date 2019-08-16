@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<import resource="../config/context.xml" />
+	<import resource="../config/database.xml" />
+	
+	<!-- Job -->
+ 	<batch:job id="productRedisJob" xmlns="http://www.springframework.org/schema/batch">
+ 		<batch:step id="redisStep">
+ 			<batch:tasklet>
+ 				<batch:chunk reader="productItemReader" writer="productRedisWriter" commit-interval="100" />
+ 			</batch:tasklet>
+ 		</batch:step>
+ 	</batch:job>
+	
+
+	<!-- Customer Item Reader -->
+	<bean id="productItemReader" class="org.springframework.batch.item.database.JdbcCursorItemReader" scope="step">
+		<property name="dataSource" ref="dataSource" />
+		<property name="fetchSize" value="200" />
+		<property name="sql">
+			<value>
+            <![CDATA[        
+            	SELECT productCode, productName, productLine, productScale, productVendor, productDescription, quantityInStock, buyPrice, MSRP
+				FROM classicmodels.products
+            ]]>
+			</value>
+		</property>
+		<property name="rowMapper">
+			<bean class="com.prateek.mapper.ProductRowMapper" />
+		</property>
+	</bean>
+	
+	
+	<bean id="productRedisWriter" class="com.prateek.writer.ProductRedisWriter" scope="step">
+		<!-- <constructor-arg name="template" ref="redisTemplate" /> -->
+	</bean>
+			
+</beans>

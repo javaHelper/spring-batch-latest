@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+	<user>
+		<id>1</id>
+		<name>John Doe</name>
+	</user>
+	<user>
+		<id>2</id>
+		<name>Ricky Johnson</name>
+	</user>
+	<user>
+		<id>3</id>
+		<name>Jeff Cook</name>
+	</user>
+	<user>
+		<id>4</id>
+		<name>Matt Wixson</name>
+	</user>
+	<user>
+		<id>5</id>
+		<name>David Kerr</name>
+	</user>
+</users>

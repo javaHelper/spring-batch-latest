@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<import resource="../config/context.xml" />
+	<import resource="../config/database.xml" />
+	
+	
+	<!-- ===== Customer Job ==== -->
+	<batch:job id="customerJob" xmlns="http://www.springframework.org/schema/batch">
+		<batch:step id="initContextStep"  next="customerDecision">
+			<batch:tasklet ref="updateCustomerContextTasklet" />
+		</batch:step>
+		
+		<batch:decision id="customerDecision" decider="customerDecider">
+			<batch:next on="YES_SUCCESS" to="step1" />
+			<batch:end on="NO_FAILURE" exit-code="STOPPED"  /> 
+		</batch:decision>
+	
+		<batch:step id="step1">
+			<batch:tasklet>
+				<chunk reader="cutomerItemReader" writer="customerItemWritter" commit-interval="10" />
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+
+	<!-- Customer Item Reader -->
+	<bean id="cutomerItemReader" class="org.springframework.batch.item.database.JdbcCursorItemReader" scope="step">
+		<property name="dataSource" ref="dataSource" />
+		<property name="sql">
+			<value>
+            <![CDATA[        
+            	SELECT customerNumber, customerName, contactLastName, contactFirstName, phone,addressLine1, addressLine2, city, state, postalCode, 
+            	country,salesRepEmployeeNumber,creditLimit
+				FROM customers;
+            ]]>
+			</value>
+		</property>
+		<property name="rowMapper">
+			<bean class="com.prateek.mapper.CustomerRowMapper" />
+		</property>
+	</bean>
+	
+	
+	<bean id="custFlatFileCallBack" class="com.prateek.callback.CustomerFlatFileWriterCallback" />
+	
+	<bean id="customerDecider" class ="com.prateek.step.decider.CustomerDecider">
+		<constructor-arg name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="updateCustomerContextTasklet" class="com.prateek.step.tasklet.UpdateCustomerContextTasklet" scope="step">
+		<property name="customerRunMode" value="#{jobParameters['runMode']}" />
+		<property name="executionContext" value="#{stepExecution.jobExecution.executionContext}" />
+	</bean>
+
+
+	<!-- Customer Item Writer -->
+	<bean id="customerItemWritter" class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
+		<property name="resource" value="file:csv/output/customers.csv" />
+		<property name="shouldDeleteIfExists" value="true" />
+		<property name="appendAllowed" value="true" />
+		<property name="headerCallback" ref="custFlatFileCallBack" />
+		
+		<property name="lineAggregator">
+			<bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+				<property name="delimiter" value="," />
+				
+				<property name="fieldExtractor">
+					<bean class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+						<property name="names" value="customerNumber, customerName, contactLastName, contactFirstName, phone,addressLine1, addressLine2, city, state, postalCode, 
+		            									country,salesRepEmployeeNumber,creditLimit" />
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+</beans>
