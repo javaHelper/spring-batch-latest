@@ -1,0 +1,1 @@
+curl --data 'name=foo' localhost:8080
