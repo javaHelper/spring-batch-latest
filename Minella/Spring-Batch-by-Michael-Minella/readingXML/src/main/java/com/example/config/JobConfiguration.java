@@ -1,13 +1,19 @@
 package com.example.config;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.ItemPreparedStatementSetter;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +30,9 @@ public class JobConfiguration {
 	
 	@Autowired
 	private StepBuilderFactory stepBuilderFactory;
+	
+	@Autowired
+	private DataSource dataSource;
 	
 	@Bean
 	public StaxEventItemReader<Customer> customerItemReader(){
@@ -45,20 +54,11 @@ public class JobConfiguration {
 	}
 	
 	@Bean
-	public ItemWriter<Customer> customerItemWriter(){
-		return items -> {
-			for (Customer customer : items) {
-				System.out.println(customer.toString());
-			}
-		};
-	}
-	
-	@Bean
 	public Step step1() {
 		return stepBuilderFactory.get("step1")
-				.<Customer, Customer>chunk(10)
+				.<Customer, Customer>chunk(200)
 				.reader(customerItemReader())
-				.writer(customerItemWriter())
+				.writer(writer())
 				.build();
 	}
 	
@@ -67,5 +67,24 @@ public class JobConfiguration {
 		return jobBuilderFactory.get("job")
 				.start(step1())
 				.build();
+	}
+	
+	@Bean
+	public JdbcBatchItemWriter<Customer> writer() {
+		JdbcBatchItemWriter<Customer> writer = new JdbcBatchItemWriter<>();
+		writer.setDataSource(this.dataSource);
+		writer.setSql("INSERT INTO customer (id, birthdate, first_name, last_name) VALUES (?,?,?,?)");
+		writer.setItemPreparedStatementSetter(new CustomerItemPreparedStmSetter());
+		return writer;
+	}
+	
+	private  class CustomerItemPreparedStmSetter implements ItemPreparedStatementSetter<Customer> {
+
+		public void setValues(Customer result, PreparedStatement ps) throws SQLException {
+			ps.setLong(1, result.getId());
+			ps.setDate(2, java.sql.Date.valueOf( result.getBirthdate() ));
+			ps.setString(3, result.getFirstName());
+			ps.setString(4, result.getLastName());
+		}
 	}
 }

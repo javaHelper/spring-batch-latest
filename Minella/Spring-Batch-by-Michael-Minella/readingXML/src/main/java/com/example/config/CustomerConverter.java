@@ -1,6 +1,6 @@
 package com.example.config;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import com.example.domain.Customer;
@@ -39,7 +39,7 @@ public class CustomerConverter implements Converter {
 		
 		reader.moveUp();
 		reader.moveDown();
-		customer.setBirthdate(LocalDateTime.parse(reader.getValue(), DT_FORMATTER));
+		customer.setBirthdate(LocalDate.parse(reader.getValue(), DT_FORMATTER));
 		
 		return customer;
 	}
