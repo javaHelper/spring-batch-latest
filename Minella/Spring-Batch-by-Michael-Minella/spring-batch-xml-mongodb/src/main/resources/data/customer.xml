@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<customers>
+	<customer>
+		<id>1</id>
+		<firstName>John</firstName>
+		<lastName>Doe</lastName>
+		<birthdate>10-10-1988 19:43:23</birthdate>
+	</customer>
+	<customer>
+		<id>2</id>
+		<firstName>James</firstName>
+		<lastName>Moss</lastName>
+		<birthdate>01-04-1991 10:20:23</birthdate>
+	</customer>
+	<customer>
+		<id>3</id>
+		<firstName>Jonie</firstName>
+		<lastName>Gamble</lastName>
+		<birthdate>21-07-1982 11:12:13</birthdate>
+	</customer>
+	<customer>
+		<id>4</id>
+		<firstName>Mary</firstName>
+		<lastName>Kline</lastName>
+		<birthdate>07-08-1973 11:27:42</birthdate>
+	</customer>
+	<customer>
+		<id>5</id>
+		<firstName>William</firstName>
+		<lastName>Lockhart</lastName>
+		<birthdate>04-04-1994 04:15:11</birthdate>
+	</customer>
+	<customer>
+		<id>6</id>
+		<firstName>John</firstName>
+		<lastName>Doe</lastName>
+		<birthdate>10-10-1988 19:43:23</birthdate>
+	</customer>
+	<customer>
+		<id>7</id>
+		<firstName>Kristi</firstName>
+		<lastName>Dukes</lastName>
+		<birthdate>17-09-1983 21:22:23</birthdate>
+	</customer>
+	<customer>
+		<id>8</id>
+		<firstName>Angel</firstName>
+		<lastName>Porter</lastName>
+		<birthdate>15-12-1980 18:09:09</birthdate>
+	</customer>
+	<customer>
+		<id>9</id>
+		<firstName>Mary</firstName>
+		<lastName>Johnston</lastName>
+		<birthdate>07-07-1987 19:43:03</birthdate>
+	</customer>
+	<customer>
+		<id>10</id>
+		<firstName>Linda</firstName>
+		<lastName>Rodriguez</lastName>
+		<birthdate>16-09-1991 09:13:43</birthdate>
+	</customer>
+	<customer>
+		<id>11</id>
+		<firstName>Phillip</firstName>
+		<lastName>Lopez</lastName>
+		<birthdate>18-12-1965 11:10:09</birthdate>
+	</customer>
+	<customer>
+		<id>12</id>
+		<firstName>Peter</firstName>
+		<lastName>Dixon</lastName>
+		<birthdate>09-05-1996 19:09:23</birthdate>
+	</customer>
+</customers>
