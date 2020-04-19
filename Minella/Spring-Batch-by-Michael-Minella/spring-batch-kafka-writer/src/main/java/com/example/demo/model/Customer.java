@@ -1,7 +1,5 @@
 package com.example.demo.model;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +13,5 @@ public class Customer {
 	private Long id;
 	private String firstName;
 	private String lastName;
-	private LocalDateTime birthdate;
+	private String birthdate;
 }

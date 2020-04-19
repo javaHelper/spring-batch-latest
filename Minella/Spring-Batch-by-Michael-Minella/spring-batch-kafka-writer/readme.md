@@ -19,6 +19,13 @@ kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test --from
 kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test --max-messages 10
 
 
+kafka-topics.bat --zookeeper localhost:2181 --alter --topic customers --delete-config retention.ms
+
+WARNING: Altering topic configuration from this script has been deprecated and may be removed in future releases.
+         Going forward, please use kafka-configs.sh for this functionality
+Updated config for topic customers.
+
+
 ```
 C:\Users\pc>kafka-topics.bat --list --zookeeper localhost:2181
 

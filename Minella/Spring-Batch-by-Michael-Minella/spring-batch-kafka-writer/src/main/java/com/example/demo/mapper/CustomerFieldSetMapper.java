@@ -1,6 +1,5 @@
 package com.example.demo.mapper;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
@@ -18,7 +17,7 @@ public class CustomerFieldSetMapper implements FieldSetMapper<Customer> {
 				.id(fieldSet.readLong("id"))
 				.firstName(fieldSet.readRawString("firstName"))
 				.lastName(fieldSet.readRawString("lastName"))
-				.birthdate(LocalDateTime.parse(fieldSet.readRawString("birthdate"), DT_FORMAT))
+				.birthdate(fieldSet.readRawString("birthdate"))
 				.build();
 	}
 
