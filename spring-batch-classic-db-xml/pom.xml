@@ -14,7 +14,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-batch-vesion>4.0.1.RELEASE</spring-batch-vesion>
-		<mysql.version>8.0.11</mysql.version>
+		<mysql.version>8.0.16</mysql.version>
 		<logback.version>1.2.3</logback.version>
 		<jcl.slf4j.version>1.7.25</jcl.slf4j.version>
 		<quartz.version>2.2.1</quartz.version>
